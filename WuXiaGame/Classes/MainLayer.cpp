@@ -65,14 +65,15 @@ bool MainLayer::init()
 	_tilefoe->setVisible(false);
 
 	_tilemap->setAnchorPoint(Vec2::ZERO);
-	_tilemap->setPosition(Vec2(576,2368));
+	_tilemap->setPosition(Vec2::ZERO);
 	this->addChild(_tilemap,0);
 
+/*测试问题添加的精灵 非demo内容*/
     Sprite* pictemp = Sprite::create("pic/yy.png");
     pictemp->setAnchorPoint(Vec2::ZERO);
     pictemp->setPosition(Vec2::ZERO);
     this->addChild(pictemp,0);
-
+/**/
 
 	//创建主角
 	_role = new Role();//创建主角
