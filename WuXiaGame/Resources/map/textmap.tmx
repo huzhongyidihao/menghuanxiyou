@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="50" height="40" tilewidth="64" tileheight="64">
+ <tileset firstgid="1" name="test" tilewidth="64" tileheight="64" spacing="1">
+  <image source="test.png" trans="ff007f" width="544" height="416"/>
+ </tileset>
+ <tileset firstgid="49" name="pppig" tilewidth="64" tileheight="64" spacing="1">
+  <image source="pppig.png" trans="ff007f" width="154" height="144"/>
+  <tile id="3">
+   <properties>
+    <property name="donenter" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="53" name="rolehead" tilewidth="64" tileheight="64" spacing="1">
+  <image source="rolehead.png" trans="ff007f" width="148" height="158"/>
+  <tile id="3">
+   <properties>
+    <property name="createfoe" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="basemap" width="50" height="40">
+  <properties>
+   <property name="pass" value="true"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztllFuwzAMQ3OJXKPr/U+3fXTAoInkk51iLbAPo2kd23oSRfd2HMfH17g/xvfz7fF8K/Pu959zbqgzurl781nn6r71nTo34ejOXuFIMU/W3o/fLBOOlG/HU7WSzlB16wblULlbzSPJVce8w+H2dWzq7In+lAa7HlEc7neqL3cm6Q+lKVJbp6GaG7Le5S71gtNTd57TkavfK3I4byY1TL1BPUAxdM9KHzV+6mVKz8TTuhi7OfKu0sqUQ2mK9JyrJ/Up0ivEJxV7ug9SnZ7NQbioXtU+rk+olyoOlYc6kr463vMx1LvOEwiH0/ikL5LOzmPG0nGkuOv38w2Gy/8/x2tyON3vnj+53yd32pSj9py6v+vas3nnKo66R+JI3ke8OJ33VxwqTsLhtLDKQe4Pdwcljknc3f28yzH9//EuHGlN5wWpF+h/iSs4SG3qGSmOSa2u4OjWp16f1GOV44raTjmoRlRc9cwpR/JcqqvdvlvhUJpQOtvhUL1Eakjecxp7Ngft025+R2O786t+o/qL+q7bl9TNcTgf2KkB8SylO7e/63vKoXwt6c7FmepFa+FyNPWrFQ7iI8l33J3V9QD1sC5uWouV+yxxkLpRP3O1oJ48md/1xNS701xTHhJL6sGJB01z+Qmi0WA2
+  </data>
+ </layer>
+ <layer name="collision" width="50" height="40" opacity="0.01">
+  <data encoding="base64" compression="zlib">
+   eJztz7kJADAMBEEVpf5rc+IODNbDDGx8XAQAAOyVt+ky/n/JAfnRq1fV+9U2fAAAAIDpDolCHXU=
+  </data>
+ </layer>
+ <layer name="foelayer" width="50" height="40" opacity="0">
+  <data encoding="base64" compression="zlib">
+   eJzt2EEKgDAMAME+y/+/zGsRhaZEsqQ74E1Dt/bUMTS7kp5KWQ3ZXdEZ9I7MOZlnZ3UW6czOonvSpeP5DcmpHVQdGiRJklSHdoexi96xujZyR2RtXTre3ifYuUOidXytv0NH5H9Q/HUvWaVDgySJ5Qb1WylZ
+  </data>
+ </layer>
+ <objectgroup name="object" width="0" height="0">
+  <object name="startpoint" x="1536" y="640"/>
+  <object name="endpoint" x="1600" y="2048"/>
+ </objectgroup>
+</map>

@@ -17,6 +17,10 @@ public:
 public:
 	/*存档*/
 	static PlayInfo*_playinfoSave;//玩家信息存档 
+
+
+
+	cocos2d::TMXTiledMap*_tilemap;
 private:
 	void ReadSave();//读档
 };

@@ -2,6 +2,7 @@
 #include "MainLayer.h"
 #include "CombatLayer.h"
 #include "Role.h"
+#include "JsonParser.h"
 
 USING_NS_CC;
 #pragma execution_character_set("utf-8")
@@ -22,14 +23,16 @@ bool MainGameScene::init()
 	Size frameSize = Director::getInstance()->getOpenGLView()->getFrameSize();
 	log("FrameSize: width=%f,height=%f", frameSize.width, frameSize.height);
 	Rect visrect=Director::getInstance()->getOpenGLView()->getVisibleRect();
-	log("rect: width=%f,height=%f",visrect.size.width,visrect.size.height);
-	log("rect poition=(%f,%f)", visrect.origin.x, visrect.origin.y);
+//	log("rect: width=%f,height=%f",visrect.size.width,visrect.size.height);
+//	log("rect poition=(%f,%f)", visrect.origin.x, visrect.origin.y);
 
 	/*------------------------*/
 	isCreateCombarLayer = false;
 
 
 	isPlayBGM = true;
+
+	
 	/*------------------------*/
 	/*初始化角色信息UI*/
 	/*显示角色信息: 头像 血条 内力 之类*/
@@ -45,12 +48,20 @@ bool MainGameScene::init()
 	_roleHealth->setVisible(true);
 	_roleHealth->setPosition(Vec2(1, 23));
 	addChild(_roleHealth, 7);
+	_roleHealthVaule = Label::createWithTTF("x", "fonts/DFPShaoNvW5-GB.ttf", 10);
+	_roleHealthVaule->setAnchorPoint(Vec2::ZERO);
+	_roleHealthVaule->setPosition(Vec2(1, 23));
+	addChild(_roleHealthVaule, 8);
 	_roleEnergy = ui::LoadingBar::create("pic/energyslot.png");
 	_roleEnergy->setPercent(100.f);
 	_roleEnergy->setAnchorPoint(Vec2::ZERO);
 	_roleEnergy->setVisible(true);
 	_roleEnergy->setPosition(Vec2(1, 2));
 	addChild(_roleEnergy, 7);
+	_roleEnergyVaule = Label::createWithTTF("x", "fonts/DFPShaoNvW5-GB.ttf", 10);
+	_roleEnergyVaule->setAnchorPoint(Vec2::ZERO);
+	_roleEnergyVaule->setPosition(Vec2(1, 2));
+	addChild(_roleEnergyVaule, 8);
 	/*-----------------*/
 	
 	_mainlayer = MainLayer::create();
@@ -70,16 +81,21 @@ bool MainGameScene::init()
 	
 
 
-	MenuItemFont::setFontSize(14);
+	MenuItemFont::setFontSize(10);
 //	MenuItemFont* entorCombat = MenuItemFont::create("进入战斗!", CC_CALLBACK_1(MainGameScene::menuEnterCombatCallback, this));
 //	MenuItemFont*exitCombat = MenuItemFont::create("退出战斗!", CC_CALLBACK_1(MainGameScene::menuExitCombatCallback, this));
+	MenuItemFont*addmaxhealth = MenuItemFont::create("增加200生命上限!", CC_CALLBACK_1(MainGameScene::menuRoleAddMaxHealthCallback, this));
+	MenuItemFont*rechealth = MenuItemFont::create("恢复200生命!", CC_CALLBACK_1(MainGameScene::menuRoleRecHealthCallback, this));
+	MenuItemFont*addattack = MenuItemFont::create("增加20攻击力!", CC_CALLBACK_1(MainGameScene::menuRoleAddAttackCallback, this));
 	MenuItemFont*autoFindPath = MenuItemFont::create("自动寻路!", CC_CALLBACK_1(MainGameScene::menuAutoFindPathCallback, this));
 	MenuItemFont*exitSave = MenuItemFont::create("存档!", CC_CALLBACK_1(MainGameScene::menuSaveCallback, this));
 	MenuItemFont*exitNoSave = MenuItemFont::create("退出!", CC_CALLBACK_1(MainGameScene::menuExitCallback, this));
-	_debugmenu = Menu::create(exitSave, exitNoSave, autoFindPath,nullptr);
+	MenuItemFont*DeCodeJson = MenuItemFont::create("解析Json", CC_CALLBACK_1(MainGameScene::menuJsonDecode, this));
+	MenuItemFont*EnCodeJson = MenuItemFont::create("编码Json", CC_CALLBACK_1(MainGameScene::menuJsonEncode, this));
+	_debugmenu = Menu::create(addmaxhealth, rechealth, addattack,exitSave, exitNoSave, autoFindPath, DeCodeJson, EnCodeJson,nullptr);
 	addChild(_debugmenu, 2);
 	_debugmenu->setPosition(50,Director::getInstance()->getVisibleSize().height-200);
-	_debugmenu->alignItemsVerticallyWithPadding(20);
+	_debugmenu->alignItemsVerticallyWithPadding(2);
 	scheduleUpdate();
 
 
@@ -151,6 +167,85 @@ void MainGameScene::menuAutoFindPathCallback(cocos2d::Ref * pSender)
 
 
 	log("调试菜单项,自动寻路MainGameScene 调用");
+}
+
+void MainGameScene::menuRoleAddAttackCallback(cocos2d::Ref * pSender)
+{
+	_mainlayer->GetMainRole()->RoleAddAttackValue(20);
+	log("调试菜单项,为角色增加20攻击力");
+}
+
+void MainGameScene::menuRoleRecHealthCallback(cocos2d::Ref * pSender)
+{
+	int tmep=_mainlayer->GetMainRole()->getHealth();
+	_mainlayer->GetMainRole()->setHealth(tmep +200);
+	log("调试菜单项,为角色恢复200生命");
+}
+
+void MainGameScene::menuRoleAddMaxHealthCallback(cocos2d::Ref * pSender)
+{
+	_mainlayer->GetMainRole()->RoleAddMaxHealth(200);
+	log("调试菜单项,为角色增加200生命上限");
+}
+
+void MainGameScene::menuJsonDecode(cocos2d::Ref * pSender)
+{
+	auto parser = JsonParser::createWithFile("Notes.json");
+	parser->decode();
+
+	auto list = parser->getList();
+	int index = 0;
+	for (auto&v:list)
+	{
+		log("-------------[%d]---------------", ++index);
+		ValueMap row = v.asValueMap();
+		for (auto &pair:row)
+		{
+			log("===>%s=%s", pair.first.c_str(),pair.second.asString().c_str());
+		}
+	}
+}
+
+void MainGameScene::menuJsonEncode(cocos2d::Ref * pSender)
+{
+	ValueVector listData;
+	auto createValueMap1 = [&]()
+	{
+		ValueMap ret;
+		ret["ID"] = Value(1);
+		ret["CDate"] = Value("2018-5-20");
+		ret["ID"] = "发布iOSBool1";
+		ret["ID"] = "tony1";
+		return ret;
+	};
+	listData.push_back(Value(createValueMap1()));
+
+	auto createValueMap2 = [&]()
+	{
+		ValueMap ret;
+		ret["ID"] = Value(2);
+		ret["CDate"] = Value("2018-5-21");
+		ret["ID"] = "发布iOSBool2";
+		ret["ID"] = "tony2";
+		return ret;
+	};
+	listData.push_back(Value(createValueMap2()));
+
+	auto createValueMap3 = [&]()
+	{
+		ValueMap ret;
+		ret["ID"] = Value(3);
+		ret["CDate"] = Value("2018-5-22");
+		ret["ID"] = "发布iOSBool3";
+		ret["ID"] = "tony3";
+		return ret;
+	};
+	listData.push_back(Value(createValueMap3()));
+
+
+
+	auto parser = JsonParser::createWithArray(listData);
+	parser->encode();
 }
 
 void MainGameScene::menuSaveCallback(cocos2d::Ref * pSender)
@@ -267,6 +362,10 @@ void MainGameScene::ShowMainUI()
 void MainGameScene::UpdateHealthAndEnergy()
 {
 	auto obj=_mainlayer->GetMainRole();
+	auto s1 = Value(obj->getHealth()).asString();
+	auto s2 = Value(obj->getEnergy()).asString();
+	_roleHealthVaule->setString(s1);
+	_roleEnergyVaule->setString(s2);
 	float health =( obj->getHealth()*1.0f / obj->getMaxHealth()*1.0f)*100.0f;
 	float energy =(obj->getEnergy()*1.0f / obj->getMaxEnergy()*1.0f)*100.0f;
 	_roleHealth->setPercent(health);

@@ -41,6 +41,9 @@ public:
 	bool isEndCombat;//是否结束战斗
 	bool isSucceed;//战斗是否胜利
 
+				   /*战斗流程相关*/
+	bool IsdoOrder;//是否执行了指令  判断回合是否提前结束
+
 	/*----------自身角色---------------*/
 	Role*_myRole;//玩家自身角色指针
 private:
@@ -108,8 +111,8 @@ private:
 	std::vector<cocos2d::Rect>_allRoleRect;
 	std::vector<Role*>_allRoleRectFrom;
 
-	/*战斗流程相关*/
-	bool IsdoOrder;//是否执行了指令  判断回合是否提前结束
+	
+
 
 
 

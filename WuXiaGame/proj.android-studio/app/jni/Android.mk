@@ -22,10 +22,12 @@ LOCAL_SRC_FILES := $(LOCAL_PATH)/hellocpp/main.cpp \
 				   $(LOCAL_PATH)/../../../Classes/GameStartScene.cpp \
 				   $(LOCAL_PATH)/../../../Classes/CombatLayer.cpp \
 				   $(LOCAL_PATH)/../../../Classes/GameRuleAbout.cpp \
+				   $(LOCAL_PATH)/../../../Classes/JsonParser.cpp \
+				   $(LOCAL_PATH)/../../../Classes/effect.cpp \
 				   $(LOCAL_PATH)/../../../Classes/GameSystem.cpp \
 				   $(LOCAL_PATH)/../../../Classes/Role.cpp
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../Classes
-
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../Classes \
+					$(LOCAL_PATH)/../../../cocos2d/external/json
 # _COCOS_HEADER_ANDROID_BEGIN
 # _COCOS_HEADER_ANDROID_END
 

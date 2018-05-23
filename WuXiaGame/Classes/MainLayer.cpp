@@ -37,7 +37,9 @@ bool MainLayer::init()
 	//String* str = String::createWithContentsOfFile(FileUtils::getInstance()->fullPathForFilename(file.c_str()).c_str());
 //	std::string path = FileUtils::getInstance()->fullPathForFilename(file.c_str());
 //	_tilemap = TMXTiledMap::create(path);
-	_tilemap = TMXTiledMap::create("map/citymap01over.tmx");
+
+	_tilemap = TMXTiledMap::create("map/csc.tmx");
+
 	if (_tilemap!=nullptr)
 	{
 
@@ -65,14 +67,15 @@ bool MainLayer::init()
 	_tilefoe->setVisible(false);
 
 	_tilemap->setAnchorPoint(Vec2::ZERO);
-	_tilemap->setPosition(Vec2(576,2368));
+	_tilemap->setPosition(Vec2::ZERO);
 	this->addChild(_tilemap,0);
 
-    Sprite* pictemp = Sprite::create("pic/yy.png");
-    pictemp->setAnchorPoint(Vec2::ZERO);
-    pictemp->setPosition(Vec2::ZERO);
-    this->addChild(pictemp,0);
-
+	/*调试添加图片  非游戏内容*/
+//    Sprite* pictemp = Sprite::create("pic/yy.png");
+ //   pictemp->setAnchorPoint(Vec2::ZERO);
+ //   pictemp->setPosition(Vec2::ZERO);
+ //   this->addChild(pictemp,0);
+	/*---------------------*/
 
 	//创建主角
 	_role = new Role();//创建主角
@@ -116,6 +119,7 @@ bool MainLayer::init()
 	_currfoenums = 0;
 
 	_cruuCombatFoe = nullptr;
+
 
 
 	return true;
@@ -229,7 +233,7 @@ void MainLayer::ExitCombat()
 
 bool MainLayer::onTouchBegan(Touch * touch, Event * unused_event)
 {
-	log("onTouchBegan  事件");
+//	log("onTouchBegan  事件");
 	return true;
 }
 
@@ -262,18 +266,7 @@ void MainLayer::onTouchEnded(Touch * touch, Event * unused_event)
 	if (_role->getPosition().x<nodeLocation.x)//如果角色x坐标小于触摸点x坐标(角色获取的坐标也是节点坐标，因为它是这个瓦片地图节点的子对象)
 	{
 	
-		////镜像反转
-		//if (!_role->_roleBasePic->isFlippedX())
-		//{
-		//	_role->_roleBasePic->setFlippedX(true);
-		//}
-		//else
-		//{
-		//	if (_role->_roleBasePic->isFlippedX())
-		//	{
-		//		_role->_roleBasePic->setFlippedX(false);
-		//	}
-		//}		
+
 		if (_role->getPosition().y>nodeLocation.y)
 		{
 			//即往右下角方向:东
@@ -334,14 +327,22 @@ void MainLayer::onTouchEnded(Touch * touch, Event * unused_event)
 				auto temp = CountMoveTime(_role->getPosition(), nodeLocation, _role->getRoleSpeed());
 				if (oldDirection == _role->getRoleDirection())//如果新方向和旧方向一致
 				{
+					
+					//_role->_roleBasePic->stopAllActions();
+			
+					_role->isChangeDirection = false;
+					_role->_roleBasePic->stopAction(_role->moveaction);//停止移动动作
+		
 					this->stopAllActions();
 					_role->MoveAnimation(temp, nodeLocation);//根据新的方向重新移动
 					ViewfollowWithRole(temp, nodeLocation);
-					log("角色动作不会因新目标而停止");
+					_role->isChangeDirection = true;
+					//log("角色动作不会因新目标而停止");
 				}
 				else
 				{
 					//停止当前动作 (包括动画动作和移动动作)
+					log("改变方向");
 					_role->_roleBasePic->stopAllActions();
 					this->stopAllActions();
 					_role->MoveAnimation(temp, nodeLocation);//根据新的方向重新移动
@@ -446,8 +447,8 @@ cocos2d::Vec2 MainLayer::RandomCreateFoePoistion()
 
 void MainLayer::InitFoeArea()
 {
-	int x=_tilemap->getMapSize().width;
-	int y = _tilemap->getMapSize().height;
+	float x=_tilemap->getMapSize().width;
+    float y = _tilemap->getMapSize().height;
 	for (int i=0;i<x;i++)
 	{
 		for (int k=0;k<y;k++)
@@ -529,14 +530,26 @@ void MainLayer::autoMovePath(std::deque<cocos2d::Vec2>way,cocos2d::Vec2 endpoint
 	{
 			Vec2 temp = ConvertPositionFromMapVec(moveactionPoint[i]);
 			float time = CountMoveTime(fontpoint, temp, _role->getRoleSpeed());
-			auto moveaction=MoveTo::create(time, temp);
+
+			auto delay = DelayTime::create(time);
+			auto moveaction = CallFunc::create([&,time,temp]()
+			{
+				_role->MoveAnimation(time, temp);//移动
+				//auto moveaction = MoveTo::create(time, temp);
+				log("moveaction 调用");
+				
+				//
+
+			});
+		//	auto moveaction = MoveTo::create(time, temp);
 			auto callfun = CallFunc::create([&,time,temp]()
 			{
+				log("callfun 调用");
 				ViewfollowWithRole(time, temp);
 				
 			});
 			moveVector.pushBack(moveaction);
-			Spawn*spawnaction = Spawn::create(moveaction, callfun, nullptr);
+			Spawn*spawnaction = Spawn::create(delay,moveaction, callfun, nullptr);
 			spawnVector.pushBack(spawnaction);
 			fontpoint = temp;//更新fontpoint 		
 	}
@@ -548,13 +561,17 @@ void MainLayer::autoMovePath(std::deque<cocos2d::Vec2>way,cocos2d::Vec2 endpoint
 		ViewfollowWithRole(lasttime, endpoint);
 
 	});
-	Spawn*spawnaction = Spawn::create(MoveTo::create(lasttime, endpoint), callfun, nullptr);
-	//moveVector.pushBack(MoveTo::create(lasttime, endpoint));
+
+	auto rolemovefun = CallFunc::create([&,lasttime,endpoint]()
+	{
+		_role->MoveAnimation(lasttime, endpoint);
+	});
+	Spawn*spawnaction = Spawn::create(rolemovefun, callfun, nullptr);
 	spawnVector.pushBack(spawnaction);
 
 
 	//至此 移动动作全部添加完毕
-	//auto seqaction=Sequence::create(moveVector);
+
 	auto seqaction = Sequence::create(spawnVector);
 	_role->_roleBasePic->runAction(seqaction);
 }
@@ -569,8 +586,8 @@ void MainLayer::autoFindPath()
 	for(auto &w:temp)
 	{
 		log("路径点(%f,%f)",w.x,w.y);//打印坐标
-		Sprite* obj=_tilebaselayer->getTileAt(w);
-		obj->setColor(Color3B(220,170,150));
+//		Sprite* obj=_tilebaselayer->getTileAt(w);
+//		obj->setColor(Color3B(220,170,150));
 	}
 	
 
@@ -685,14 +702,14 @@ Vec2 MainLayer::ConvertPositionInMap(Vec2 point)
 	}
 	else
 	{
-		y = _tilemap->getMapSize().height;
+		y = _tilemap->getMapSize().height-1;
 	}
 
 
 
 
 	Vec2 v = Vec2(x, y);
-	log("返回的=Vec(%d,%d)", x, y);
+	//log("返回的=Vec(%d,%d)", x, y);
 	return v;
 }
 

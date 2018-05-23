@@ -37,7 +37,7 @@ private:
 	bool isFindEndPoint;
 	int pointendx;
 	int pointendy;
-	
+	cocos2d::TMXTiledMap*_tilemap;
 private:
 	GameSuanFaClass() {}
 	GameSuanFaClass(GameSuanFaClass const&);

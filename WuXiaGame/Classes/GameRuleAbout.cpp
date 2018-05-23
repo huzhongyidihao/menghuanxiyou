@@ -63,6 +63,7 @@ std::deque<Vec2> GameSuanFaClass::MinShortWayFind(Vec2 start/*起点*/, Vec2 tar
 {
 	log("起点瓦片坐标:%f,%f", start.x, start.y);
 	log("终点瓦片坐标:%f,%f", target.x, target.y);
+	_tilemap = _map;
 	MapNodeClass::InitTMXMapandLayer(_map,_tileblockage);
 	pointendx = target.x;
 	pointendy = target.y;
@@ -104,45 +105,44 @@ void GameSuanFaClass::CreateOutSkirtsNode(MapNodeClass*point)
 {
 	auto x = point->getXvaule();
 	auto y = point->getYvaule();
-	if (x>=1&&y>=1)
-	{
+	auto size = _tilemap->getMapSize();
 		for (int i=x-1;i<=x+1;i++)
 		{
 			for (int k=y-1;k<=y+1;k++)
 			{
-				//先判断这个要创建的点是不是终点
-				if (pointendx ==i&&pointendy==k)
+				if (i>=0&&i<size.width&&k>=0&&k<size.height)//先判断点是否存在地图上
 				{
-					//如果是终点
-					isFindEndPoint = true;
-					break;
-				}
-				else
-				{
-					auto ret = IsHaveNode(i, k);
-					//判断是否已经创建过
-					if (!ret)//如果没创建过
+					//先判断这个要创建的点是不是终点
+					if (pointendx == i&&pointendy == k)
 					{
-						
-						//那么创建
-						MapNodeClass* obj = new MapNodeClass(i, k, point);
-						_allNodeCollection.push_back(obj);
-						if (obj->getIsPass())//如果可以通行
+						//如果是终点
+						isFindEndPoint = true;
+						break;
+					}
+					else
+					{
+						auto ret = IsHaveNode(i, k);
+						//判断是否已经创建过
+						if (!ret)//如果没创建过
 						{
-							obj->setParent(point);
-							_unSelectionCollection.push_back(obj);//放置入未选择容器
-						}
 
+							//那么创建
+							MapNodeClass* obj = new MapNodeClass(i, k, point);
+							_allNodeCollection.push_back(obj);
+							if (obj->getIsPass())//如果可以通行
+							{
+								obj->setParent(point);
+								_unSelectionCollection.push_back(obj);//放置入未选择容器
+							}
+
+						}
 					}
 				}
-				
+		
 			}
 		}
-	}
-	else
-	{
-		log("实际上不会发生");
-	}
+
+
 
 }
 

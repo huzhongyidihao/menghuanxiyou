@@ -1,7 +1,7 @@
 ﻿#include "Role.h"
 #include "CombatLayer.h"
 #include "GameRuleAbout.h"
-
+#include "effect.h"
 USING_NS_CC;
 
 #pragma execution_character_set("utf-8")
@@ -17,6 +17,9 @@ _role_x(0.0f),_role_y(0.0f), _haveMemory(false)
 
 	_currCombatlayer = nullptr;
 	currSkillIndex =1;
+
+	isChangeDirection = true;
+
 
 	//初始化动画
 	SpriteFrameCache::getInstance()->addSpriteFramesWithFile("renwu/shusheng.plist");
@@ -148,8 +151,23 @@ void Role::RoleMagic(Role*target,std::vector<Role*>*roleptrvect)
 		{
 			//奔雷咒动作
 			log("奔雷咒抬手");
-			Role* obj = this;
-			GameCombatRule::RoleUseSkill( obj, target, roleptrvect);	
+
+			//法术特效
+			effect*_effect = effect::create();
+			_effect->init(1);//初始化为1号特效
+			_effect->setPosition(target->getPosition());
+			_currCombatlayer->addChild(_effect, 6);
+	
+			_effect->runAction(Sequence::create(_effect->_showeffect, CallFunc::create([&,target,roleptrvect]() {
+				_currCombatlayer->removeChild(_effect);
+				log("移除特效");
+				log("结算技能效果");
+				Role* obj = this;
+				GameCombatRule::RoleUseSkill(obj, target, roleptrvect);
+				_currCombatlayer->IsdoOrder = true;
+			}), nullptr));
+			//
+
 		}
 		break;
 	case 2:
@@ -197,6 +215,26 @@ void Role::RoleLoseHealth(int num)
 		_roleCurrHealth = _roleCurrHealth - num;
 	}
 	log("损失生命:%d,剩余生命:%d",num,_roleCurrHealth);
+}
+
+void Role::RoleAddMaxHealth(int v)
+{
+	_roleMaxHealth = _roleMaxHealth + v;
+}
+
+void Role::RoleAddMaxEnergy(int v)
+{
+	_roleMaxEnergy = _roleMaxEnergy + v;
+}
+
+void Role::RoleAddAttackValue(int v)
+{
+	_roleAttackValue = _roleAttackValue + v;
+}
+
+void Role::RoleAddDefenseValue(int v)
+{
+	_roleDefenseValue = _roleDefenseValue + v;
 }
 
 void Role::SetIsRoleConversely()
@@ -253,8 +291,20 @@ void Role::ValueEffectShow(Role*obj,int num,int typeindex)
 	atlasLabel->runAction(act2);
 }
 
-void Role::setHealth()
+void Role::setHealth(int v)
 {
+	if (v>=0)
+	{
+		if (v <= _roleMaxHealth)
+		{
+			_roleCurrHealth = v;
+		}
+		else
+		{
+			_roleCurrHealth = _roleMaxHealth;
+		}
+	}
+	
 }
 
 void Role::setEnergy()
@@ -285,6 +335,7 @@ void Role::setCurrCombatlayer(CombatLayer*obj)
 	_currCombatlayer = obj;
 }
 
+
 cocos2d::Vec2 Role::GetStartPoint()
 {
 
@@ -297,27 +348,68 @@ void Role::StandingAnimation()
 
 void Role::MoveAnimation(float time ,Vec2 point)
 {
+	//更新方向
+	if (getPosition().x < point.x)//如果角色x坐标小于触摸点x坐标(角色获取的坐标也是节点坐标，因为它是这个瓦片地图节点的子对象)
+	{
+
+
+		if (getPosition().y > point.y)
+		{
+			//即往右下角方向:东
+			_roledirection = 0;
+		}
+
+		else
+		{
+			_roledirection=2;//北
+		}
+
+	}
+	else
+	{
+		if (getPosition().y > point.y)
+		{
+			_roledirection=1;//南
+		}
+		else
+		{
+			_roledirection=3;//西
+		}
+	}
 	
 	//根据朝向direction 来执行不同朝向的动画
-	log("当前角色朝向:%d", _roledirection);
+//	log("当前角色朝向:%d", _roledirection);
 	switch (_roledirection)
 	{
 	case 0://东
 	{
-	//	log("动画0的引用计数为=%d", _roleMoveAnimate0->getReferenceCount());
-		auto repaction0 = RepeatForever::create(_roleMoveAnimate0);
-	//	log("动画0的引用计数为=%d", _roleMoveAnimate0->getReferenceCount());
-		_roleBasePic->runAction(repaction0);
-		_roleBasePic->runAction(Sequence::create(MoveTo::create(time, point), CallFunc::create([=]() {
-	//		log("动画0的引用计数为=%d", _roleMoveAnimate0->getReferenceCount());
-			_roleBasePic->stopAction(repaction0);
-	//		log("动画0的引用计数为=%d", _roleMoveAnimate0->getReferenceCount());
-	//		log("停止动作");
-			_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-10.png"));
-			_roleBasePic->setFlippedX(false);
-			setRoleState(0);
+
+		if (isChangeDirection)//如果改变了方向
+		{
+			auto repaction0 = RepeatForever::create(_roleMoveAnimate0);
+			repaction0->setTag(1);
+			_roleBasePic->runAction(repaction0);
+		//	log("动画0");
+		}
+		moveaction = MoveTo::create(time, point);
+		_roleBasePic->runAction(moveaction);
+		_roleBasePic->runAction(Sequence::create(DelayTime::create(time), CallFunc::create([=]() {
+			if (getPosition().distance(point)<=0.8f)
+			{
+				log("到达目标，停止角色移动动画");
+				_roleBasePic->stopActionByTag(1);
+
+				//log("停止动作");
+				_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-10.png"));
+				_roleBasePic->setFlippedX(false);
+				setRoleState(0);
+			}
+			else
+			{
+				log("时间到了，但是没有到达目标，继续播放移动动画");
+			}		
 		}), nullptr));
-		log("移动东0");
+	//	log("移动东0");
 		
 	}
 	break;
@@ -325,56 +417,92 @@ void Role::MoveAnimation(float time ,Vec2 point)
 	{	
 	
 	//	log("动画1的引用计数为=%d", _roleMoveAnimate1->getReferenceCount());
-		auto repaction1 = RepeatForever::create(_roleMoveAnimate1);
-	//	log("动画1的引用计数为=%d", _roleMoveAnimate1->getReferenceCount());
-		_roleBasePic->runAction(repaction1);
-		_roleBasePic->runAction(Sequence::create(MoveTo::create(time, point), CallFunc::create([=]() {
-	//		log("动画1的引用计数为=%d", _roleMoveAnimate1->getReferenceCount());
-				_roleBasePic->stopAction(repaction1);
-	//		log("动画1的引用计数为=%d", _roleMoveAnimate1->getReferenceCount());
-	//		log("停止动作");
-			_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-23.png"));
+		if (isChangeDirection)//如果改变了方向
+		{
+			auto repaction1 = RepeatForever::create(_roleMoveAnimate1);
+			repaction1->setTag(1);
+			_roleBasePic->runAction(repaction1);
+		//	log("动画1");
+		}
 		
-			setRoleState(0);
+		moveaction = MoveTo::create(time, point);
+		_roleBasePic->runAction(moveaction);
+		_roleBasePic->runAction(Sequence::create(DelayTime::create(time), CallFunc::create([=]() {
+
+			if (getPosition().distance(point) <= 1.0f)
+			{
+				_roleBasePic->stopActionByTag(1);
+				//		log("停止动作");
+				_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-23.png"));
+				setRoleState(0);
+			}
+			else
+			{
+				log("时间到了，但是没有到达目标，继续播放移动动画");
+			}
+
 		}), nullptr));
-	log("移动南1");
+	//log("移动南1");
 	}
 		break;
 	case 2://北
 	{
-	//	log("动画2的引用计数为=%d", _roleMoveAnimate2->getReferenceCount());
-		auto repaction2 = RepeatForever::create(_roleMoveAnimate2);
-	//	log("动画2的引用计数为=%d", _roleMoveAnimate2->getReferenceCount());
-		_roleBasePic->runAction(repaction2);
-		_roleBasePic->runAction(Sequence::create(MoveTo::create(time, point), CCCallFunc::create([=]() {
-	//		log("动画2的引用计数为=%d", _roleMoveAnimate2->getReferenceCount());
-				_roleBasePic->stopAction(repaction2);
-	//		log("动画2的引用计数为=%d", _roleMoveAnimate2->getReferenceCount());
-			log("停止动作");
-			_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-33.png"));
-		
-			setRoleState(0);
+		if (isChangeDirection)//如果改变了方向
+		{
+			auto repaction2 = RepeatForever::create(_roleMoveAnimate2);
+			repaction2->setTag(1);
+			_roleBasePic->runAction(repaction2);
+		//	log("动画2");
+		}
+		moveaction = MoveTo::create(time, point);
+		_roleBasePic->runAction(moveaction);
+		_roleBasePic->runAction(Sequence::create(DelayTime::create(time), CCCallFunc::create([=]() {
+			if (getPosition().distance(point) <= 1.0f)
+			{
+				_roleBasePic->stopActionByTag(1);
+				//		log("停止动作");
+				_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-33.png"));
+				setRoleState(0);
+			}
+			else
+			{
+				log("时间到了，但是没有到达目标，继续播放移动动画");
+			}
+	
 		}), nullptr));
-	log("移动北2");
+	//log("移动北2");
 	}
 		break;
 	case 3://西
 	{
-	//	log("动画3的引用计数为=%d", _roleMoveAnimate3->getReferenceCount());
-		auto repaction3 = RepeatForever::create(_roleMoveAnimate3);
-	//	log("动画3的引用计数为=%d", _roleMoveAnimate3->getReferenceCount());
-		_roleBasePic->runAction(repaction3);
-		_roleBasePic->runAction(Sequence::create(MoveTo::create(time, point), CCCallFunc::create([=]() {
-	//		log("动画3的引用计数为=%d", _roleMoveAnimate3->getReferenceCount());
-				_roleBasePic->stopAction(repaction3);
-	//			log("动画3的引用计数为=%d", _roleMoveAnimate3->getReferenceCount());
-	//			log("停止动作");
 
-			_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-43.png"));
+		if (isChangeDirection)//如果改变了方向
+		{
+			auto repaction3 = RepeatForever::create(_roleMoveAnimate3);
+			repaction3->setTag(1);
+			_roleBasePic->runAction(repaction3);
+		//	log("动画3");
 			
-			setRoleState(0);
+		}
+
+		moveaction = MoveTo::create(time, point);
+		_roleBasePic->runAction(moveaction);
+		_roleBasePic->runAction(Sequence::create(DelayTime::create(time), CCCallFunc::create([=]() {
+
+			if (getPosition().distance(point) <= 1.0f)
+			{
+				_roleBasePic->stopActionByTag(1);
+				//	log("停止动作");
+				_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-43.png"));
+				setRoleState(0);
+			}
+			else
+			{
+				log("时间到了，但是没有到达目标，继续播放移动动画");
+			}
+			
 		}), nullptr));
-	log("移动西3");
+	//log("移动西3");
 	}
 		break;
 	default:

@@ -29,6 +29,13 @@ public:
 	void RoleRecoverHealth(int );//恢复生命
 	void RoleLoseHealth(int );//损失生命
 
+	/*---属性修改--*/
+	void RoleAddMaxHealth(int);//添加生命上限
+	void RoleAddMaxEnergy(int);//添加内力上限
+	void RoleAddAttackValue(int);//添加角色攻击力
+	void RoleAddDefenseValue(int);//添加角色防御力
+
+
 	void SetIsRoleConversely();//设置角色倒地/还是闲置状态 (死亡状态 角色设置为倒地)
 
 
@@ -42,7 +49,7 @@ public:
 	int getEnergy() { return _roleCurrEnergy; }
 	int getAttack() { return _roleAttackValue; }
 	int getDefense() { return _roleDefenseValue; }
-	void setHealth();
+	void setHealth(int);
 	void setEnergy();
 	void setAttack();
 	int getRoleState() { return _roleState; }
@@ -54,6 +61,8 @@ public:
 
 	int GetRoleTag() { return _roleBasePic->getTag(); }//获取角色标签
 	static	void setCurrCombatlayer(CombatLayer*);//设置当前战斗场景  :供maingammescene调用
+
+
 
 	cocos2d::Vec2 GetStartPoint();
 public:
@@ -73,6 +82,12 @@ public:
 
 	
 	int currSkillIndex;
+
+	//
+	cocos2d::MoveTo* moveaction;
+	bool isChangeDirection;//是否改变方向
+	
+
 private:
 	/*游戏性属性-角色区别的主要属性*/
 	/*  基本属性*/

@@ -28,6 +28,12 @@ public:
 	void menuEnterCombatCallback(cocos2d::Ref*pSender);//调试菜单项 进入战斗
 	void menuExitCombatCallback(cocos2d::Ref*pSender);//调试菜单项 退出战斗
 	void menuAutoFindPathCallback(cocos2d::Ref*pSender);//调试菜单项 自动寻路 
+	void menuRoleAddAttackCallback(cocos2d::Ref*pSender);//调试菜单项 为角色增加20攻击力
+	void menuRoleRecHealthCallback(cocos2d::Ref*pSender);//调试菜单项 为角色恢复200生命
+	void menuRoleAddMaxHealthCallback(cocos2d::Ref*pSender);//调试菜单项 为角色增加200生命上限
+
+	void menuJsonDecode(cocos2d::Ref*pSender);//解码
+	void menuJsonEncode(cocos2d::Ref*pSender);//编码
 
 	void menuSaveCallback(cocos2d::Ref*pSender);//系统菜单项  存档退出 
 	void menuExitCallback(cocos2d::Ref*pSender);//系统菜单项  直接退出
@@ -55,10 +61,11 @@ private:
 
 	cocos2d::Sprite*_rolePic;//角色肖像
 	cocos2d::ui::LoadingBar*_roleHealth;
+	cocos2d::Label*_roleHealthVaule;
 	cocos2d::ui::LoadingBar*_roleEnergy;
+	cocos2d::Label*_roleEnergyVaule;
 	MainLayer* _mainlayer;
 	CombatLayer*_combatlayer;
-
 
 
 };

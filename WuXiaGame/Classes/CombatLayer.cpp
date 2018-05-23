@@ -4,6 +4,7 @@
 #include "GameRuleAbout.h"
 #include "SimpleAudioEngine.h"
 
+
 USING_NS_CC;
 using namespace CocosDenshion;
 #pragma execution_character_set("utf-8")
@@ -269,13 +270,14 @@ void CombatLayer::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * unused_e
 					IsdoOrder = true;
 					break;
 				case CombatLayer::shifa:
-					
+				{
 					GameCombatRule::_gRoleSkill = bengleizou;
 					_myRole->currSkillIndex = GameCombatRule::_gRoleSkill;
+				
 					_myRole->RoleMagic(_tatgetRole, GetFoeTeamCollection());
 					IsDetectionTouch = false;
-					IsdoOrder = true;
-				
+					//IsdoOrder = true;
+				}
 					break;
 				default:
 					break;
@@ -338,6 +340,7 @@ void CombatLayer::DrawOurTeam()
 			addChild(_showRoleCollection[i]->_roleBasePic);
 			_showRoleCollection[i]->setPosition(Vec2(winSize.width - 120, winSize.height - 200));
 			auto v = _showRoleCollection[i]->getPosition();
+			_showRoleCollection[i]->_roleBasePic->setSpriteFrame(SpriteFrameCache::getInstance()->getSpriteFrameByName("f-41.png"));
 			log("己方角色的坐标:(%f,%f)", v.x, v.y);
 			_showRoleCollection[i]->_roleBasePic->setTag(1);
 

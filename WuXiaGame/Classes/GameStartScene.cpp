@@ -16,6 +16,18 @@ bool GameStartScene::init()
 	/*-----------------------*/
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+
+	//_tilemap = TMXTiledMap::create("map/citymap01over.tmx");
+ //   _tilemap->setAnchorPoint(Vec2::ZERO);
+ //   _tilemap->setPosition(Vec2::ZERO);
+	//addChild(_tilemap);
+
+	
+
+
+
+
 	MenuItemFont::setFontName("fonts/DFPShaoNvW5-GB.ttf");
 	MenuItemFont::setFontSize(24);
 	MenuItemFont* menuiteStart = MenuItemFont::create("新的探索",CC_CALLBACK_1(GameStartScene::menuStartCallback, this));
