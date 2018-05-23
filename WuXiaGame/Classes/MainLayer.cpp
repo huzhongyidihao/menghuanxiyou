@@ -70,12 +70,21 @@ bool MainLayer::init()
 	_tilemap->setPosition(Vec2::ZERO);
 	this->addChild(_tilemap,0);
 
+<<<<<<< HEAD
 	/*调试添加图片  非游戏内容*/
 //    Sprite* pictemp = Sprite::create("pic/yy.png");
  //   pictemp->setAnchorPoint(Vec2::ZERO);
  //   pictemp->setPosition(Vec2::ZERO);
  //   this->addChild(pictemp,0);
 	/*---------------------*/
+=======
+/*测试问题添加的精灵 非demo内容*/
+    Sprite* pictemp = Sprite::create("pic/yy.png");
+    pictemp->setAnchorPoint(Vec2::ZERO);
+    pictemp->setPosition(Vec2::ZERO);
+    this->addChild(pictemp,0);
+/**/
+>>>>>>> 2c496bafc182b2799d9744f943cccf1f36bae652
 
 	//创建主角
 	_role = new Role();//创建主角
